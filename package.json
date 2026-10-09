@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --import ./tests/setup.ts --experimental-test-module-mocks --test 'tests/**/*.test.ts'",
+    "test": "node --import tsx --import ./tests/setup.mjs --experimental-test-module-mocks --test 'tests/**/*.test.ts'",
     "check": "npm run lint && npm run typecheck && npm test",
     "db:migrate": "prisma migrate deploy",
     "db:migrate-turso": "tsx scripts/migrate-turso.ts",

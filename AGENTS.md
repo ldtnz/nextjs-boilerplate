@@ -196,8 +196,12 @@ in the database rather than in the environment.
 ## Tests
 
 - `npm test` runs every `tests/**/*.test.ts` with Node's test runner.
-  `tests/setup.ts` gives each run a fresh temporary SQLite database built from
+  `tests/setup.mjs` gives each run a fresh temporary SQLite database built from
   the migrations — developer and production data are never touched.
+- **The setup file stays plain JavaScript and main-thread only.** Its
+  `--import` is inherited by every worker thread a dependency starts, and tsx's
+  resolver is not in effect there; as TypeScript it failed to load and took
+  the worker down with it. `tests/setup.test.ts` starts a worker to keep it so.
 - **Route tests call the real handlers** with a real `NextRequest` and the real
   database (see `tests/api-items.test.ts`). Routes are where a mistake costs
   rows, so they are tested as routes.

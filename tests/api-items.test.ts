@@ -2,7 +2,7 @@
  * The item routes, driven as routes.
  *
  * These call the real handlers with a real NextRequest against a real
- * database — a fresh one per test process, built by tests/setup.ts from the
+ * database — a fresh one per test process, built by tests/setup.mjs from the
  * migrations — so status codes, validation and what actually lands in the
  * row are all part of what is checked. A route mishandling a body is a row
  * changed or lost, which is exactly what a unit test of a helper cannot see.
