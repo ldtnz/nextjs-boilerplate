@@ -1,0 +1,213 @@
+@import "tailwindcss";
+
+/* -----------------------------------------------------------------------
+   Design tokens.
+
+   Dark only, on purpose: one theme designed properly beats two designed
+   halfway. Surfaces step up in small increments from a near-black
+   background, so depth comes from layering rather than from borders or
+   shadows. Colour is reserved for meaning — a status, a destructive action,
+   the one thing on screen that matters — never for decoration.
+
+   Use them through Tailwind (`bg-surface-2`, `text-muted`, `text-accent-2`);
+   the @theme block below is what makes those utilities exist.
+   ----------------------------------------------------------------------- */
+:root {
+  --background: #09090a;
+  --surface: #131314;
+  --surface-2: #1c1c1e;
+  /* One step further up, for hovering something already on --surface-2. */
+  --surface-3: #26262a;
+  --foreground: #f2f2f3;
+  --muted: #8b8b90;
+  --accent: #6b7280;
+  /* Positive state: saved, done, selected. */
+  --accent-2: #22c55e;
+  /* Reserved for anything an AI produces, so it is recognisable as such. A
+     magenta pulled back from neon, so it sits in a near-black, mostly grey UI
+     without glowing out of it. */
+  --accent-ai: #df68df;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-ai: var(--accent-ai);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  color-scheme: dark;
+  overscroll-behavior-y: none;
+  /* No double-tap zoom and no automatic text resizing when the phone turns
+     to landscape. */
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  touch-action: manipulation;
+  /* No text highlighting: it reads as a native app, not a web page. Form
+     fields are exempted below, so typing and selecting what you typed still
+     works normally. Remove this if the app is mostly reading. */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input,
+textarea,
+[contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Long-pressing an image on iOS opens Save Image and lets it be dragged out —
+   in an installed app that reads as a web page showing through. */
+img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Scrollbars hidden everywhere; scrolling still works. */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* -----------------------------------------------------------------------
+   Motion. Short, decelerating, and switched off for reduced motion.
+   ----------------------------------------------------------------------- */
+
+/* Small things arriving: a notice, a step of a form. */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise-in {
+  animation: rise-in 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* A tooltip dropping out of the field it belongs to rather than blinking in. */
+@keyframes tooltip-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+.tooltip-in {
+  animation: tooltip-in 150ms ease-out;
+}
+
+/* Feedback drawn on a Select after a save (src/components/Select.tsx): quick
+   to appear, slow to fade, so it is noticed without being waited for. */
+.select-feedback-idle {
+  transition-duration: 700ms;
+  transition-timing-function: ease-out;
+}
+.select-feedback-success {
+  border-color: var(--accent-2);
+  transition-duration: 100ms;
+}
+.select-feedback-error {
+  border-color: var(--color-red-400);
+  transition-duration: 100ms;
+}
+
+/* -----------------------------------------------------------------------
+   Dialogs. Every modal is a `.app-modal-overlay` with an `.app-modal-panel`
+   inside it, so they cannot drift apart — see ConfirmDialog and Modal.
+   ----------------------------------------------------------------------- */
+.app-modal-overlay {
+  /* The same colour twice: the rgba is what a browser that cannot parse the
+     color-mix keeps, and dropping the declaration entirely would leave the
+     dialog with no scrim at all rather than a weaker one. #09090a is
+     --background. */
+  background-color: rgba(9, 9, 10, 0.45);
+  background-color: color-mix(in srgb, var(--background) 45%, transparent);
+  background-image:
+    radial-gradient(ellipse at top, rgba(9, 9, 10, 0.75), transparent 70%),
+    radial-gradient(ellipse at center, rgba(9, 9, 10, 0.3), transparent 65%),
+    radial-gradient(ellipse at center, transparent 10%, var(--background) 95%);
+  background-position: top, center, center;
+  background-repeat: no-repeat;
+  background-size: 100% calc(12rem + env(safe-area-inset-top)), 100% 100%, 100% 100%;
+  /* Overlays are written `fixed inset-0`, which in an installed PWA on iOS
+     comes out one status bar short at the bottom and leaves a dark band under
+     the dialog. An explicit height is the whole screen there and exactly what
+     `inset-0` gives everywhere else. */
+  bottom: auto;
+  height: 100dvh;
+}
+
+.app-modal-panel {
+  background-color: var(--surface);
+  box-shadow: 0 24px 70px -18px rgba(0, 0, 0, 0.9);
+  /* A hairline edge: without it a panel reads as a hole in the page rather
+     than a sheet over it, and it is the one part of the glass that cannot
+     fail. */
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .app-modal-panel {
+    /* Glass, but not load-bearing. Safari on iOS drops backdrop-filter on
+       some panels, so the tint alone has to hold the panel together and the
+       blur only improves it where it works. Below about 90% the content
+       behind comes through readably wherever the blur is lost. */
+    background-color: rgba(19, 19, 20, 0.94); /* --surface, for the same reason */
+    background-color: color-mix(in srgb, var(--surface) 94%, transparent);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    backdrop-filter: blur(24px) saturate(140%);
+  }
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes dialog-in {
+  from { transform: translateY(10px) scale(0.96); }
+  to { transform: none; }
+}
+@keyframes sheet-in {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+/* The backdrop carries the fade; the panel only moves, so its opacity is not
+   animated twice. A centred dialog grows the last few percent into place, a
+   sheet anchored to the bottom edge slides up from it. */
+.overlay-in {
+  animation: overlay-in 140ms ease-out;
+}
+.dialog-in {
+  animation: dialog-in 190ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sheet-in {
+  animation: sheet-in 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise-in,
+  .tooltip-in,
+  .overlay-in,
+  .dialog-in,
+  .sheet-in {
+    animation: none;
+  }
+}

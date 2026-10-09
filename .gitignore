@@ -1,0 +1,38 @@
+# dependencies
+/node_modules
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+/build
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+
+# env files — real secrets never get committed, the template does
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# local database: created by `npm run db:migrate`, holds real data, never committed
+/prisma/dev.db
+/prisma/dev.db-journal
+/prisma/dev.db-shm
+/prisma/dev.db-wal
+
+# service worker generated at build time by @serwist/next (see src/app/sw.ts)
+/public/sw.js
+/public/sw.js.map
+/public/swe-worker-*.js
+/public/swe-worker-*.js.map

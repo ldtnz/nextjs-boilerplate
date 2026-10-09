@@ -1,0 +1,43 @@
+// Prisma schema. SQLite locally, Turso (libSQL, same dialect) when hosted —
+// see src/lib/prisma.ts for how the client picks between them.
+//
+// Changing it: add a numbered folder under prisma/migrations with the SQL,
+// keep this file in step, then `npm run db:sql` to refresh docs/schema.sql
+// (a test fails until you do). Migrations are additive: add columns with a
+// default rather than rewriting tables, so a database that is a version behind
+// can always be brought forward by running what it is missing.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Single row (id fixed to 1) for configuration chosen inside the app rather
+// than at deploy time. Deploy-time secrets stay in environment variables:
+// a leaked database should not hand over anything that signs or decrypts.
+model Settings {
+  id          Int      @id @default(1)
+  // What the app calls its user. Empty until one is chosen.
+  displayName String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// The example entity the starter ships with — a list of things with a title,
+// an optional note and a done flag. Replace it with the project's own model;
+// it exists so every layer (route, test, page, dialog) has a worked example.
+model Item {
+  id        Int      @id @default(autoincrement())
+  title     String
+  note      String?
+  done      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+}
